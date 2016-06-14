@@ -14,7 +14,7 @@ $(document).ready(function() {
 			});
 		} else {
 			$.ajax({
-				url: '/play',
+				url: '/pause',
 				method: 'GET',
 				async: true,
 				dataType: 'text',
