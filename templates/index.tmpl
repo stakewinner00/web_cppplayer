@@ -5,8 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <meta charset="utf-8">
         <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <!--<link type="text/css" rel="stylesheet" href="/resources/css/materialize.min.css" media="screen,projection"/>-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+        <link type="text/css" rel="stylesheet" href="/resources/css/materialize.min.css" media="screen,projection"/>
         <link type="text/css" rel="stylesheet" href="/resources/css/custom.css" media="screen,projection"/>
     </head>
     <body>
@@ -15,29 +14,27 @@
                 <div class="card">
                     <div class="card-image">
                         <img src="http://lorempixel.com/g/540/400/abstract/">
-                        <span class="card-title">Titulo de la Canción</span>
+                        <span  id="titulos-cancion" class="card-title">Titulo de la Canción<br><small>Artista</small></span>
                     </div>
                     <div class="card-content">
-                        <a  href="/Pause" class="btn-floating btn-large waves-effect waves-light  blue darken-3 right" id="btn-play-pause"><i class="material-icons">pause</i></a>
+                        <a class="btn-floating btn-large waves-effect waves-light  blue darken-3 right" id="btn-play-pause"><i class="material-icons">pause</i></a>
                         <p>Volumen:</p>
                         <p class="range-field" id="control-volumen">
-                            <input type="range" id="test5" min="0" max="100" />
+                            <input type="range" id="valor-volumen" min="0" max="100" />
                         </p>
                     </div>
                     <div class="card-action">
                         <div class="row">
-                            <div class="col s4 center"><a href="/Next" class="btn-floating btn-large waves-effect waves-light  blue darken-3" id="btn-play-prev"><i class="material-icons">skip_previous</i></a></div>
-                            <div class="col s4 center"><a class="btn-floating btn-large waves-effect waves-light  red darken-3" id="btn-play-prev"><i class="material-icons">stop</i></a></div>
-                            <div class="col s4 center"><a href="/Prev" class="btn-floating btn-large waves-effect waves-light  blue darken-3" id="btn-play-next"><i class="material-icons">skip_next</i></a></div>
+                            <div class="col s4 center"><a class="btn-floating btn-large waves-effect waves-light  blue darken-3" id="btn-prev"><i class="material-icons">skip_previous</i></a></div>
+                            <div class="col s4 center"><a class="btn-floating btn-large waves-effect waves-light  red darken-3" id="btn-stop"><i class="material-icons">stop</i></a></div>
+                            <div class="col s4 center"><a class="btn-floating btn-large waves-effect waves-light  blue darken-3" id="btn-next"><i class="material-icons">skip_next</i></a></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!--<script type="text/javascript" src="/resources/js/jquery-2.1.1.min.js"></script>
-        <script type="text/javascript" src="/resources/js/materialize.min.js"></script>-->
-        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+        <script type="text/javascript" src="/resources/js/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="/resources/js/materialize.min.js"></script>
         <script type="text/javascript" src="/resources/js/custom.js"></script>
     </body>
 </html>
