@@ -2,7 +2,7 @@ package main
 
 import (
 	"html/template"
-  "io/ioutil"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -49,35 +49,36 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NextHandler(w http.ResponseWriter, r *http.Request) {
-  err := ioutil.WriteFile("/tmp/dplayer++", []byte{2}, 0666)
-  if err != nil {
-        panic(err)
-  }
+	err := ioutil.WriteFile("/tmp/dplayer++", []byte{2}, 0666)
+	if err != nil {
+		panic(err)
+	}
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PrevHandler(w http.ResponseWriter, r *http.Request) {
-  err := ioutil.WriteFile("/tmp/dplayer++", []byte{3}, 0666)
-  if err != nil {
-        panic(err)
-  }
+	err := ioutil.WriteFile("/tmp/dplayer++", []byte{3}, 0666)
+	if err != nil {
+		panic(err)
+	}
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PauseHandler(w http.ResponseWriter, r *http.Request) {
-  err := ioutil.WriteFile("/tmp/dplayer++", []byte{4}, 0666)
-  if err != nil {
-        panic(err)
-  }
+	err := ioutil.WriteFile("/tmp/dplayer++", []byte{4}, 0666)
+	if err != nil {
+		panic(err)
+	}
 	RenderTemplate(w, "index", "index", "")
 }
 
 func main() {
+	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	http.HandleFunc("/", RootHandler)
 	http.HandleFunc("/next/", NextHandler)
 	http.HandleFunc("/prev/", PrevHandler)
 	http.HandleFunc("/pause/", PauseHandler)
 
 	log.Print("Escuchando en el puerto " + PORT)
-  http.ListenAndServe(":"+PORT, nil)
+	http.ListenAndServe(":"+PORT, nil)
 }
