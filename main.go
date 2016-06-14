@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 )
 
 //Puerto donde escuchar
 const PORT = "8998"
+
+//TODO: Se debe parsear el enum de los comandos de tal forma que no sea necesario tener los valores harcodeados
 
 //TODO: Por el momento suponemos que los pipes estan en /tmp
 //Config por defecto, estaría bien usar swig para reusar la clase del daemon
@@ -72,12 +78,46 @@ func PauseHandler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, "index", "index", "")
 }
 
+func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile("/tmp/dplayer++", []byte{16}, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Open("/tmp/cplayer++")
+	if err != nil {
+		panic(err)
+	}
+
+	reader := bufio.NewReader(f)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
+	fmt.Fprint(w, line)
+}
+
+func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	err := ioutil.WriteFile("/tmp/dplayer++", []byte{15}, 0666)
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile("/tmp/dplayer++", []byte(urlPart[2]+"\n"), 0666)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	http.HandleFunc("/", RootHandler)
 	http.HandleFunc("/next/", NextHandler)
 	http.HandleFunc("/prev/", PrevHandler)
 	http.HandleFunc("/pause/", PauseHandler)
+	http.HandleFunc("/getvolume/", GetVolumeHandler)
+	http.HandleFunc("/setvolume/", SetVolumeHandler)
 
 	log.Print("Escuchando en el puerto " + PORT)
 	http.ListenAndServe(":"+PORT, nil)
