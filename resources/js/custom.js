@@ -134,9 +134,9 @@ $(document).ready(function() {
         ChangeTheme($(this).attr('data-theme'));
     });
 
-    // Prevcarga Volumen
+    // Precarga Volumen
     $.ajax({
-        url: '/setvolume/' + vol,
+        url: '/getvolume',
         method: 'GET',
         async: false,
         dataType: 'text',
