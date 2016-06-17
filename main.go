@@ -3,11 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/go-ini/ini"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/user"
 	"strings"
 )
 
@@ -25,6 +27,8 @@ type Page struct {
 	Title   string
 	Request string
 }
+
+var DaemonPipe string
 
 const templatesPath = "./templates/"
 
@@ -55,7 +59,7 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NextHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile("/tmp/dplayer++", []byte{2}, 0666)
+	err := ioutil.WriteFile(DaemonPipe, []byte{2}, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +67,7 @@ func NextHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PrevHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile("/tmp/dplayer++", []byte{3}, 0666)
+	err := ioutil.WriteFile(DaemonPipe, []byte{3}, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +75,7 @@ func PrevHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PauseHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile("/tmp/dplayer++", []byte{4}, 0666)
+	err := ioutil.WriteFile(DaemonPipe, []byte{4}, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -79,12 +83,12 @@ func PauseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile("/tmp/dplayer++", []byte{16}, 0666)
+	err := ioutil.WriteFile(DaemonPipe, []byte{16}, 0666)
 	if err != nil {
 		panic(err)
 	}
 
-	f, err := os.Open("/tmp/cplayer++")
+	f, err := os.Open(DaemonPipe)
 	if err != nil {
 		panic(err)
 	}
@@ -100,17 +104,31 @@ func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
-	err := ioutil.WriteFile("/tmp/dplayer++", []byte{15}, 0666)
+	err := ioutil.WriteFile(DaemonPipe, []byte{15}, 0666)
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile("/tmp/dplayer++", []byte(urlPart[2]+"\n"), 0666)
+	err = ioutil.WriteFile(DaemonPipe, []byte(urlPart[2]+"\n"), 0666)
 	if err != nil {
 		panic(err)
 	}
 }
 
+func Expand(path string) string {
+	usr, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	return strings.Replace(path, "~", usr.HomeDir, 1)
+}
+
 func main() {
+	cfg, err := ini.Load(Expand("~/.config/player++/daemon.conf"))
+	if err != nil {
+		panic(err)
+	}
+	DaemonPipe = Expand(cfg.Section("").Key("daemon_pipe").String())
+
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	http.HandleFunc("/", RootHandler)
 	http.HandleFunc("/next/", NextHandler)
