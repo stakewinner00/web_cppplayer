@@ -124,6 +124,7 @@ func Expand(path string) string {
 	if err != nil {
 		panic(err)
 	}
+
 	return strings.Replace(path, "~", usr.HomeDir, 1)
 }
 

@@ -134,16 +134,16 @@ $(document).ready(function() {
         ChangeTheme($(this).attr('data-theme'));
     });
 
-    // Prevcarga Volumen
+    // Precarga Volumen
     $.ajax({
-        url: '/setvolume/' + vol,
+        url: '/getvolume',
         method: 'GET',
         async: false,
         dataType: 'text',
         success: function(data) {
             var vol = 100;
             if (data != null) {
-                vol = data;
+                vol = data.trim();
             }
             
             $('#valor-volumen').val(vol);
