@@ -97,7 +97,7 @@ func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	f, err := os.Open(opt.DaemonPipe)
+	f, err := os.Open(opt.ClientPipe)
 	if err != nil {
 		panic(err)
 	}
