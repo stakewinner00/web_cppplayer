@@ -143,7 +143,7 @@ $(document).ready(function() {
         success: function(data) {
             var vol = 100;
             if (data != null) {
-                vol = data;
+                vol = data.trim();
             }
             
             $('#valor-volumen').val(vol);
