@@ -113,11 +113,7 @@ func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{15}, 0666)
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(opt.DaemonPipe, []byte(urlPart[2]+"\n"), 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte("\x0f"+urlPart[2]+"\n"), 0666)
 	if err != nil {
 		panic(err)
 	}
