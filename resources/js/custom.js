@@ -110,7 +110,7 @@ $(document).ready(function() {
 		var vol = $(this).val();
 
 		$.ajax({
-			url: '/setvolumen/' + vol,
+			url: '/setvolume/' + vol,
 			method: 'GET',
 			async: false,
 			dataType: 'text',
@@ -136,7 +136,7 @@ $(document).ready(function() {
 
     // Prevcarga Volumen
     $.ajax({
-        url: '/setvolumen/' + vol,
+        url: '/setvolume/' + vol,
         method: 'GET',
         async: false,
         dataType: 'text',
