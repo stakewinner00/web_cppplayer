@@ -142,11 +142,16 @@ func LoadConfig() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Print(opt.DaemonPipe)
+
 	opt.DaemonPipe = Expand(opt.DaemonPipe)
 	opt.ClientPipe = Expand(opt.ClientPipe)
 	opt.MusicFolder = Expand(opt.MusicFolder)
 	opt.PidFile = Expand(opt.PidFile)
 	opt.DbFile = Expand(opt.DbFile)
+
+	log.Print(opt.DaemonPipe)
 }
 
 func main() {
