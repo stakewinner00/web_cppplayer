@@ -13,14 +13,11 @@ import (
 	"strings"
 )
 
-//Puerto donde escuchar
-const PORT = "8998"
-
 //TODO: Se debe parsear el enum de los comandos de tal forma que no sea necesario tener los valores harcodeados
 
-//TODO: Por el momento suponemos que los pipes estan en /tmp
-//Config por defecto, estaría bien usar swig para reusar la clase del daemon
-//const CONFIG_FILE = "~/.config/player++/daemon.conf"
+//Puerto donde escuchar
+const PORT = "8998"
+const CONFIG_FILE = "~/.config/player++/daemon.conf"
 
 //Page contiene datos de la página
 type Page struct {
@@ -62,123 +59,39 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, title string, r interfac
 	}
 }
 
-// RootHandler muestra el index
-func RootHandler(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "index", "index", "")
-}
-
-func NextHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{2}, 0666)
+func check(err error) {
 	if err != nil {
 		panic(err)
 	}
-	RenderTemplate(w, "index", "index", "")
 }
 
-func PrevHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{3}, 0666)
-	if err != nil {
-		panic(err)
-	}
-	RenderTemplate(w, "index", "index", "")
-}
-
-func PauseHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{4}, 0666)
-	if err != nil {
-		panic(err)
-	}
-	RenderTemplate(w, "index", "index", "")
-}
-
-func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{16}, 0666)
-	if err != nil {
-		panic(err)
-	}
-
+func pipeReadLine() string {
 	f, err := os.Open(opt.ClientPipe)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	reader := bufio.NewReader(f)
 	line, err := reader.ReadString('\n')
-	if err != nil {
-		panic(err)
-	}
+	check(err)
+
 	f.Close()
-	fmt.Fprint(w, line)
-}
 
-func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{8}, 0666)
-	if err != nil {
-		panic(err)
-	}
-
-	f, err := os.Open(opt.ClientPipe)
-	if err != nil {
-		panic(err)
-	}
-
-	reader := bufio.NewReader(f)
-	line, err := reader.ReadString('\n')
-	if err != nil {
-		panic(err)
-	}
-	f.Close()
-	fmt.Fprint(w, line)
-}
-
-func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{7}, 0666)
-	if err != nil {
-		panic(err)
-	}
-
-	f, err := os.Open(opt.ClientPipe)
-	if err != nil {
-		panic(err)
-	}
-
-	reader := bufio.NewReader(f)
-	line, err := reader.ReadString('\n')
-	if err != nil {
-		panic(err)
-	}
-	f.Close()
-	fmt.Fprint(w, line)
-}
-
-func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
-	urlPart := strings.Split(r.URL.Path, "/")
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte("\x0f"+urlPart[2]+"\n"), 0666)
-	if err != nil {
-		panic(err)
-	}
+	return line
 }
 
 func Expand(path string) string {
 	usr, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	return strings.Replace(path, "~", usr.HomeDir, 1)
 }
 
 func LoadConfig() {
-	cfg, err := ini.Load(Expand("~/.config/player++/daemon.conf"))
-	if err != nil {
-		panic(err)
-	}
+	cfg, err := ini.Load(Expand(CONFIG_FILE))
+	check(err)
 
 	cfg.NameMapper = ini.TitleUnderscore
 	err = cfg.MapTo(&opt)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	log.Print(opt.DaemonPipe)
 
@@ -189,6 +102,64 @@ func LoadConfig() {
 	opt.DbFile = Expand(opt.DbFile)
 
 	log.Print(opt.DaemonPipe)
+}
+
+func RootHandler(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "index", "index", "")
+}
+
+func NextHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{2}, 0666)
+	check(err)
+
+	RenderTemplate(w, "index", "index", "")
+}
+
+func PrevHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{3}, 0666)
+	check(err)
+
+	RenderTemplate(w, "index", "index", "")
+}
+
+func PauseHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{4}, 0666)
+	check(err)
+
+	RenderTemplate(w, "index", "index", "")
+}
+
+func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{16}, 0666)
+	check(err)
+
+	line := pipeReadLine()
+	
+	fmt.Fprint(w, line)
+}
+
+func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{8}, 0666)
+	check(err)
+
+	line := pipeReadLine()
+
+	fmt.Fprint(w, line)
+}
+
+func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{7}, 0666)
+	check(err)
+
+	line := pipeReadLine()
+
+	fmt.Fprint(w, line)
+}
+
+func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte("\x0f"+urlPart[2]+"\n"), 0666)
+	check(err)
 }
 
 func main() {
