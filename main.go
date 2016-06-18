@@ -111,6 +111,46 @@ func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, line)
 }
 
+func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{8}, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Open(opt.ClientPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	reader := bufio.NewReader(f)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
+	fmt.Fprint(w, line)
+}
+
+func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{7}, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Open(opt.ClientPipe)
+	if err != nil {
+		panic(err)
+	}
+
+	reader := bufio.NewReader(f)
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
+	fmt.Fprint(w, line)
+}
+
 func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
 	err := ioutil.WriteFile(opt.DaemonPipe, []byte("\x0f"+urlPart[2]+"\n"), 0666)
@@ -161,6 +201,8 @@ func main() {
 	http.HandleFunc("/pause/", PauseHandler)
 	http.HandleFunc("/getvolume/", GetVolumeHandler)
 	http.HandleFunc("/setvolume/", SetVolumeHandler)
+	http.HandleFunc("/gettitle/", GetTitleHandler)
+	http.HandleFunc("/getartist/", GetArtistHandler)
 
 	log.Print("Escuchando en el puerto " + PORT)
 	http.ListenAndServe(":"+PORT, nil)
