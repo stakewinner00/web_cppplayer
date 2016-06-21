@@ -1,5 +1,8 @@
 package main
 
+// #include <cppplayer/commands.h>
+import "C"
+
 import (
 	"bufio"
 	"fmt"
@@ -109,37 +112,37 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NextHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{2}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.NEXT}, 0666)
 	check(err)
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PrevHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{3}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.BACK}, 0666)
 	check(err)
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PauseHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{4}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.PAUSE}, 0666)
 	check(err)
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{16}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.VOLUME_GET}, 0666)
 	check(err)
 
 	line := pipeReadLine()
-	
+
 	fmt.Fprint(w, line)
 }
 
 func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{8}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.GET_TITLE}, 0666)
 	check(err)
 
 	line := pipeReadLine()
@@ -148,7 +151,7 @@ func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{7}, 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.GET_ARTIST}, 0666)
 	check(err)
 
 	line := pipeReadLine()
@@ -158,7 +161,7 @@ func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte("\x0f"+urlPart[2]+"\n"), 0666)
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte(string(C.VOLUME_SET)+urlPart[2]+"\n"), 0666)
 	check(err)
 }
 
