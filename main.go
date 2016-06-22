@@ -1,6 +1,6 @@
 package main
 
-// #include <cppplayer/commands.h> 
+// #include <cppplayer/commands.h>
 import "C"
 
 import (
@@ -165,6 +165,15 @@ func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	check(err)
 }
 
+func GetRemainingHandler(w http.ResponseWriter, r *http.Request) {
+	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.TIME_GET_REMAINING}, 0666)
+	check(err)
+
+	line := pipeReadLine()
+
+	fmt.Fprint(w, line)
+}
+
 func main() {
 	LoadConfig()
 
@@ -177,6 +186,7 @@ func main() {
 	http.HandleFunc("/setvolume/", SetVolumeHandler)
 	http.HandleFunc("/gettitle/", GetTitleHandler)
 	http.HandleFunc("/getartist/", GetArtistHandler)
+	http.HandleFunc("/getremaining/", GetRemainingHandler)
 
 	log.Print("Escuchando en el puerto " + PORT)
 	http.ListenAndServe(":"+PORT, nil)
