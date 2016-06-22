@@ -9,6 +9,24 @@ function getCookie(name) {
     return null;
 }
 
+function setDatosCancion() {
+    var artista = "";
+    var cancion = "";
+
+    $.when(
+        $.get("/getartist", function(artist) {
+            artista = artist;
+        }),
+
+        $.get("/gettitle", function(title) {
+            cancion = title;
+        })
+    ).then(function() {
+        var html = cancion + '<br><small>'+artista+'</small>';
+        $('#cancion').html(html); 
+    }); 
+}
+
 function ChangeTheme(theme) {
     var d = new Date();
     d.setTime(d.getTime() + (365*24*60*60*1000));
@@ -77,7 +95,7 @@ $(document).ready(function() {
 			async: true,
 			dataType: 'text',
 			success: function(data) {
-				// Función para obtener datos de la canción y setearlos en la página
+				setDatosCancion();
 			}
 		});
 	});
@@ -90,7 +108,7 @@ $(document).ready(function() {
 			async: true,
 			dataType: 'text',
 			success: function(data) {
-				// Función para obtener datos de la canción y setearlos en la página
+				setDatosCancion();
 			}
 		});
 	});
@@ -112,7 +130,7 @@ $(document).ready(function() {
 		$.ajax({
 			url: '/setvolume/' + vol,
 			method: 'GET',
-			async: false,
+			async: true,
 			dataType: 'text',
 			success: function(data) {}
 		});
@@ -149,4 +167,6 @@ $(document).ready(function() {
             $('#valor-volumen').val(vol);
         }
     });
+
+    setDatosCancion();
 });

@@ -1,3 +1,4 @@
 #btn-play-pause { margin-top: -48px; }
 #control-volumen input[type=range] { margin: 25px 0; }
 #titulos-cancion { text-shadow: #000 0px 2px 4px; }
+#valor-volumen { border: none; }
