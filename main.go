@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/go-ini/ini"
 	"html/template"
+  "io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,13 +29,17 @@ type Page struct {
 	Request string
 }
 
+type fifo struct {
+	DaemonPipe string
+	ClientPipe string
+}
+
 type Options struct {
-	DaemonPipe  string
-	ClientPipe  string
 	MusicFolder string
 	AutoStart   bool
 	PidFile     string
 	DbFile      string
+	fifo
 }
 
 var opt Options
@@ -69,16 +74,30 @@ func check(err error) {
 }
 
 func pipeReadLine() string {
-	f, err := os.Open(opt.ClientPipe)
+  log.Print("Reading line")
+
+	f, err := os.OpenFile(opt.fifo.ClientPipe, os.O_RDONLY, os.ModeNamedPipe)
 	check(err)
 
 	reader := bufio.NewReader(f)
+
 	line, err := reader.ReadString('\n')
+	for err == io.EOF {
+		line, err = reader.ReadString('\n')
+	}
 	check(err)
 
 	f.Close()
+  log.Print("Line readed")
 
 	return line
+}
+
+func pipeWrite(s []byte) {
+  log.Print("Writing line")
+	err := ioutil.WriteFile(opt.fifo.DaemonPipe, s, 0666)
+	check(err)
+  log.Print("Line writed")
 }
 
 func Expand(path string) string {
@@ -96,15 +115,19 @@ func LoadConfig() {
 	err = cfg.MapTo(&opt)
 	check(err)
 
+	err = cfg.Section("fifo").MapTo(&opt.fifo)
+	check(err)
+
 	log.Print(opt.DaemonPipe)
 
-	opt.DaemonPipe = Expand(opt.DaemonPipe)
-	opt.ClientPipe = Expand(opt.ClientPipe)
+	opt.fifo.DaemonPipe = Expand(opt.fifo.DaemonPipe)
+	opt.fifo.ClientPipe = Expand(opt.fifo.ClientPipe)
 	opt.MusicFolder = Expand(opt.MusicFolder)
 	opt.PidFile = Expand(opt.PidFile)
 	opt.DbFile = Expand(opt.DbFile)
 
-	log.Print(opt.DaemonPipe)
+	log.Print(opt.fifo.DaemonPipe)
+	log.Print(opt.fifo.ClientPipe)
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
@@ -112,66 +135,46 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NextHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.NEXT}, 0666)
-	check(err)
+	pipeWrite([]byte{C.NEXT})
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PrevHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.BACK}, 0666)
-	check(err)
+	pipeWrite([]byte{C.BACK})
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func PauseHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.PAUSE}, 0666)
-	check(err)
+	pipeWrite([]byte{C.PAUSE})
 
 	RenderTemplate(w, "index", "index", "")
 }
 
 func GetVolumeHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.VOLUME_GET}, 0666)
-	check(err)
-
-	line := pipeReadLine()
-
-	fmt.Fprint(w, line)
+	pipeWrite([]byte{C.VOLUME_GET})
+	fmt.Fprint(w, pipeReadLine())
 }
 
 func GetTitleHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.GET_TITLE}, 0666)
-	check(err)
-
-	line := pipeReadLine()
-
-	fmt.Fprint(w, line)
+	pipeWrite([]byte{C.GET_TITLE})
+	fmt.Fprint(w, pipeReadLine())
 }
 
 func GetArtistHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.GET_ARTIST}, 0666)
-	check(err)
-
-	line := pipeReadLine()
-
-	fmt.Fprint(w, line)
+	pipeWrite([]byte{C.GET_ARTIST})
+	fmt.Fprint(w, pipeReadLine())
 }
 
 func SetVolumeHandler(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte(string(C.VOLUME_SET)+urlPart[2]+"\n"), 0666)
-	check(err)
+	pipeWrite([]byte(string(C.VOLUME_SET) + urlPart[2]))
 }
 
 func GetRemainingHandler(w http.ResponseWriter, r *http.Request) {
-	err := ioutil.WriteFile(opt.DaemonPipe, []byte{C.TIME_GET_REMAINING}, 0666)
-	check(err)
-
-	line := pipeReadLine()
-
-	fmt.Fprint(w, line)
+	pipeWrite([]byte{C.TIME_GET_REMAINING})
+	fmt.Fprint(w, pipeReadLine())
 }
 
 func main() {
